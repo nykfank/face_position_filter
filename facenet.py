@@ -19,8 +19,11 @@ for f in os.listdir(indir):
 	img = PIL.Image.open('%s/%s' % (indir, f))
 	#boxes, probs, landmarks = mtcnn.detect(img, landmarks=True)
 	boxes, probs = mtcnn.detect(img)
+	if not probs[0]:
+		logg('%s, %s' % (f, probs[0]))
+		continue
 	for box, prob in zip(boxes, probs):
-		if not prob or prob < 0.9:
+		if prob < 0.9:
 			logg('%s, %f' % (f, prob))
 			continue
 		box_center = (box[0] + box[2]) / 2, (box[1] + box[3]) / 2
