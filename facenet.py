@@ -1,10 +1,14 @@
 import facenet_pytorch, torch, os, PIL.Image, math
-indir = '/home/nyk/test_images'
-indir = '/mnt/big/nick/cams/eingang'
+#indir = '/home/nyk/test_images'
+#indir = '/mnt/big/nick/cams/eingang'
+indir = '/mnt/big/nick/cams/bambus'
 target_pos = 775, 250
 target_size = 2800
-logfn = 'eingang_facenet.txt'
+logfn = '%s_facenet.txt' % os.path.basename
 open(logfn, 'w')
+
+if not os.path.isdir('%s1' % os.path.basename(indir)): os.mkdir('%s1' % os.path.basename(indir))
+if not os.path.isdir('%s2' % os.path.basename(indir)): os.mkdir('%s2' % os.path.basename(indir))
 
 def logg(x):
 	print(x)
@@ -23,7 +27,7 @@ for f in os.listdir(indir):
 		logg('%s, %s' % (f, probs[0]))
 		continue
 	for box, prob in zip(boxes, probs):
-		if prob < 0.9:
+		if prob < 0.95:
 			logg('%s, %f' % (f, prob))
 			continue
 		box_center = (box[0] + box[2]) / 2, (box[1] + box[3]) / 2
@@ -31,12 +35,13 @@ for f in os.listdir(indir):
 		area = (box[2] - box[0]) * (box[3] - box[1])
 		area_dist = abs(target_size - area)
 		logg('%s, %f, %d/%d/%d/%d, %d, %d' % (f, probs[0], box[0], box[1], box[2], box[3], box_dist, area_dist))
-		if box_dist > 60: continue
-		if area_dist > 600: continue
+		#if box_dist > 60: continue
+		#if area_dist > 600: continue
+		if area < target_size: continue
 		# Filter auf Augenabstand? Oder wie am besten nicht-frontal erkennen?
 		face = img.crop(box)
-		ofn = 'output/%s.png' % os.path.splitext(f)[0]
+		ofn = '%s1/%s.png' % (os.path.basename(indir), os.path.splitext(f)[0])
 		face.save(ofn)
-		ofn2 = 'output2/%s' % f
+		ofn2 = '%s2/%s' % (os.path.basename(indir), f)
 		img.save(ofn2)
 
